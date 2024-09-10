@@ -1,0 +1,57 @@
+using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Example of generated code with duplicated classes
+        string generatedCode = @"
+            public class MyClass {
+                public void Method() { Console.WriteLine(""Class 1""); }
+            }
+
+            public class MyClass {
+                public void Method() { Console.WriteLine(""Class 2""); }
+            }
+
+            public class AnotherClass {
+                public void Method() { Console.WriteLine(""Class 3""); }
+            }
+        ";
+
+        // Call the function to rename duplicated classes
+        string codeWithoutDuplicates = RenameDuplicatedClasses(generatedCode);
+        Console.WriteLine(codeWithoutDuplicates);
+    }
+
+    static string RenameDuplicatedClasses(string code)
+    {
+        // Regex to find class declarations
+        var classRegex = new Regex(@"public\s+class\s+([a-zA-Z_][a-zA-Z0-9_]*)");
+        var foundClasses = new Dictionary<string, int>();
+
+        // Replace duplicated classes by renaming them
+        string renamedCode = classRegex.Replace(code, match =>
+        {
+            string className = match.Groups[1].Value;
+
+            if (foundClasses.ContainsKey(className))
+            {
+                // Increment the counter for this class
+                foundClasses[className]++;
+                // Rename the class with the counter (e.g., MyClass1, MyClass2)
+                return $"public class {className}{foundClasses[className]}";
+            }
+            else
+            {
+                // Add the class to the dictionary and start the counter at 1
+                foundClasses[className] = 1;
+                return match.Value; // Keep the original class name for the first occurrence
+            }
+        });
+
+        return renamedCode;
+    }
+}
